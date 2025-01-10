@@ -61,6 +61,7 @@ class _CoachSelectionPageState extends State<CoachSelectionPage> {
                             selectedTrain: widget.selectedTrain,
                             selectedCoach: _selectedCoach!,
                             selectedDate: DateTime.now().toIso8601String(),
+                            passengerCount: 2,
                           ),
                         ),
                       );

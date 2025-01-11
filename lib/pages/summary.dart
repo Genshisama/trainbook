@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:trainbook/pages/home.dart';
 import 'package:trainbook/pages/ticket.dart';
 
 class SummaryPage extends StatefulWidget {
@@ -20,7 +21,7 @@ class _SummaryPageState extends State<SummaryPage> {
     );
   }
 
-  changeSeatStatus() async {
+  Future<void> changeSeatStatus() async {
     for(String seat in widget.ticket.seats){
       final path =
         'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seat/status';
@@ -54,7 +55,15 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
               ).then((_) {
                 handlePaymentCompletion();
-                changeSeatStatus();
+                changeSeatStatus().then((_) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomePage(),
+                    ),
+                    (Route<dynamic> route) => false, 
+                  );
+                });
               });
             },
             child: const Text('Pay Now'),

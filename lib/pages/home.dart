@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:trainbook/pages/ticket.dart';
 import 'package:trainbook/pages/train_select.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormBuilderState>();
   final List<String> _locations = [
     'Johor',
     'Kedah',
@@ -29,13 +32,8 @@ class _HomePageState extends State<HomePage> {
     'Selangor',
     'Terengganu',
   ];
-  String? _origin;
-  String? _destination;
-  DateTime? _departureDate;
-  DateTime? _returnDate;
-  int? _numberOfPax;
 
-  Future<void> _selectDate(BuildContext context, bool isDeparture) async {
+  Future<void> _selectDate(BuildContext context, String fieldName) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -44,13 +42,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (pickedDate != null) {
-      setState(() {
-        if (isDeparture) {
-          _departureDate = pickedDate;
-        } else {
-          _returnDate = pickedDate;
-        }
-      });
+      _formKey.currentState?.fields[fieldName]?.didChange(pickedDate);
     }
   }
 
@@ -62,121 +54,109 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
+        child: FormBuilder(
           key: _formKey,
           child: ListView(
             children: [
-              DropdownButtonFormField<String>(
+              FormBuilderDropdown<String>(
+                name: 'origin',
                 decoration: const InputDecoration(
                   labelText: 'Origin',
                   border: OutlineInputBorder(),
                 ),
-                items: _locations.map((location) {
-                  return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
-                  );
-                }).toList(),
-                value: _origin,
-                onChanged: (value) {
-                  setState(() {
-                    _origin = value;
-                    if (_destination == value) {
-                      _destination = null;
-                    }
-                  });
-                },
+                items: _locations
+                    .map((location) => DropdownMenuItem(
+                          value: location,
+                          child: Text(location),
+                        ))
+                    .toList(),
                 validator: (value) {
+                  final destination = _formKey.currentState?.fields['destination']?.value;
                   if (value == null) {
                     return 'Please select an origin';
-                  } else if (value == _destination) {
+                  } else if (value == destination) {
                     return 'Origin and destination cannot be the same';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
+              FormBuilderDropdown<String>(
+                name: 'destination',
                 decoration: const InputDecoration(
                   labelText: 'Destination',
                   border: OutlineInputBorder(),
                 ),
-                items: _locations.map((location) {
-                  return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
-                  );
-                }).toList(),
-                value: _destination,
-                onChanged: (value) {
-                  setState(() {
-                    _destination = value;
-                    if (_origin == value) {
-                      _origin = null;
-                    }
-                  });
-                },
+                items: _locations
+                    .map((location) => DropdownMenuItem(
+                          value: location,
+                          child: Text(location),
+                        ))
+                    .toList(),
                 validator: (value) {
+                  final origin = _formKey.currentState?.fields['origin']?.value;
                   if (value == null) {
                     return 'Please select a destination';
-                  } else if (value == _origin) {
+                  } else if (value == origin) {
                     return 'Origin and destination cannot be the same';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Departure Date',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context, true),
-                  ),
-                ),
-                controller: TextEditingController(
-                  text: _departureDate != null
-                      ? DateFormat('yyyy-MM-dd').format(_departureDate!)
-                      : '',
-                ),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a departure date'
-                    : null,
+              FormBuilderField<DateTime>(
+                name: 'departureDate',
+                validator: (value) => value == null ? 'Please select a departure date' : null,
+                builder: (field) {
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Departure Date',
+                      border: const OutlineInputBorder(),
+                      errorText: field.errorText,
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () => _selectDate(context, 'departureDate'),
+                      ),
+                    ),
+                    child: Text(
+                      field.value != null
+                          ? DateFormat('yyyy-MM-dd').format(field.value!)
+                          : '',
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Return Date',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context, false),
-                  ),
-                ),
-                controller: TextEditingController(
-                  text: _returnDate != null
-                      ? DateFormat('yyyy-MM-dd').format(_returnDate!)
-                      : '',
-                ),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a return date'
-                    : null,
+              FormBuilderField<DateTime>(
+                name: 'returnDate',
+                validator: (value) => value == null ? 'Please select a return date' : null,
+                builder: (field) {
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Return Date',
+                      border: const OutlineInputBorder(),
+                      errorText: field.errorText,
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () => _selectDate(context, 'returnDate'),
+                      ),
+                    ),
+                    child: Text(
+                      field.value != null
+                          ? DateFormat('yyyy-MM-dd').format(field.value!)
+                          : '',
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              FormBuilderTextField(
+                name: 'pax',
                 decoration: const InputDecoration(
                   labelText: 'Number of Passengers',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  setState(() {
-                    _numberOfPax = int.tryParse(value);
-                  });
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the number of passengers';
@@ -189,17 +169,28 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TrainSelectionPage(
+                  if(_formKey.currentState != null){
+                    if (_formKey.currentState!.saveAndValidate()) {
+                      final formData = _formKey.currentState!.value;
+                      
+                      print(formData);
+
+                      final ticket = Ticket.fromEmpty();
+                      ticket.origin = formData['origin'];
+                      ticket.destination = formData['destination'];
+                      ticket.date1 = formData['departureDate'].toUtc().toIso8601String();
+                      ticket.date2 = formData['returnDate'].toUtc().toIso8601String();
+                      ticket.pax = int.parse(formData['pax']);
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TrainSelectionPage(
+                            ticket: ticket,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   }
                 },
                 child: const Text('Submit'),

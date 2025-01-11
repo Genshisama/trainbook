@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:trainbook/pages/ticket.dart';
 
@@ -11,14 +12,25 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _SummaryPageState extends State<SummaryPage> {
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+
+  handlePaymentCompletion() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Payment completed successfully!')),
+    );
+  }
+
+  changeSeatStatus() async {
+    for(String seat in widget.ticket.seats){
+      final path =
+        'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seat/status';
+
+      await _dbRef.child(path).set("booked");
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
-    void handlePaymentCompletion() {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment completed successfully!')),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Summary')),
       body: Column(

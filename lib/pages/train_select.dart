@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:trainbook/pages/coach_select.dart';
+import 'package:trainbook/pages/ticket.dart';
 
 class TrainSelectionPage extends StatefulWidget {
-  const TrainSelectionPage({super.key});
+  final Ticket ticket;
+  const TrainSelectionPage({super.key, required this.ticket});
 
   @override
   State<TrainSelectionPage> createState() => _TrainSelectionPageState();
@@ -37,11 +39,12 @@ class _TrainSelectionPageState extends State<TrainSelectionPage> {
                       title: Text(_trains[index]),
                       trailing: const Icon(Icons.arrow_forward),
                       onTap: () {
+                        widget.ticket.train =  _trains[index];
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CoachSelectionPage(
-                              selectedTrain: _trains[index],
+                              ticket: widget.ticket,
                             ),
                           ),
                         );

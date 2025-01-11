@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:trainbook/pages/seat_select.dart';
+import 'package:trainbook/pages/ticket.dart';
 
 class CoachSelectionPage extends StatefulWidget {
-  final String selectedTrain;
+  final Ticket ticket;
 
-  const CoachSelectionPage({super.key, required this.selectedTrain});
+  const CoachSelectionPage({super.key, required this.ticket});
 
   @override
   State<CoachSelectionPage> createState() => _CoachSelectionPageState();
@@ -26,7 +27,7 @@ class _CoachSelectionPageState extends State<CoachSelectionPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Train: ${widget.selectedTrain}',
+              'Train: ${widget.ticket.train}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -54,14 +55,12 @@ class _CoachSelectionPageState extends State<CoachSelectionPage> {
               onPressed: _selectedCoach == null
                   ? null
                   : () {
+                      widget.ticket.coach = _selectedCoach ?? '';
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SeatSelectionPage(
-                            selectedTrain: widget.selectedTrain,
-                            selectedCoach: _selectedCoach!,
-                            selectedDate: DateTime.now().toIso8601String(),
-                            passengerCount: 2,
+                            ticket: widget.ticket,
                           ),
                         ),
                       );

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:trainbook/pages/ticket.dart';
 
-class SummaryPage extends StatelessWidget {
-  final List<String> selectedSeats;
+class SummaryPage extends StatefulWidget {
+  final Ticket ticket;
 
-  const SummaryPage({super.key, required this.selectedSeats});
+  const SummaryPage({super.key, required this.ticket});
 
+  @override
+  State<SummaryPage> createState() => _SummaryPageState();
+}
+
+class _SummaryPageState extends State<SummaryPage> {
   @override
   Widget build(BuildContext context) {
     void handlePaymentCompletion() {
@@ -19,10 +25,10 @@ class SummaryPage extends StatelessWidget {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: selectedSeats.length,
+              itemCount: widget.ticket.seats.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('Seat: ${selectedSeats[index]}'),
+                  title: Text('Seat: ${widget.ticket.seats[index]}'),
                 );
               },
             ),
@@ -35,8 +41,8 @@ class SummaryPage extends StatelessWidget {
                   builder: (context) => const PaymentPage(),
                 ),
               ).then((_) {
-                // Invoke callback when PaymentPage is popped
                 handlePaymentCompletion();
+                changeSeatStatus();
               });
             },
             child: const Text('Pay Now'),

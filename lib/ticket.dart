@@ -5,7 +5,7 @@ class Ticket {
   String train;
   String coach;
   String date1;
-  String date2;
+  String? date2;
   int pax;
   List<String> seats;
   double price;
@@ -18,7 +18,7 @@ class Ticket {
     required this.train,
     required this.coach,
     required this.date1,
-    required this.date2,
+    this.date2,
     required this.pax,
     required this.seats,
     required this.price,
@@ -65,7 +65,7 @@ class Ticket {
       train: '',
       coach: '',
       date1: '',
-      date2: '',
+      date2: null,
       pax: 0,
       seats: [],
       price: 0.0,

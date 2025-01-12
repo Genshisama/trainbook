@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
 import 'package:trainbook/pages/summary.dart';
 import 'package:trainbook/ticket.dart';
 import 'package:trainbook/user.dart';
+import 'package:trainbook/utils.dart';
 
 class SeatSelectionPage extends StatefulWidget {
   final Ticket ticket;
@@ -35,7 +35,8 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   }
 
   Future<void> _initializeTrainData() async {
-    final path = 'trains/${widget.ticket.train}';
+    String tripId = '${processDate(widget.ticket.date1)}, ${widget.time}';
+    final path = 'trains/${widget.ticket.train}/$tripId';
     final snapshot = await _dbRef.child(path).get();
 
     if (!snapshot.exists) {
@@ -118,7 +119,10 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
       builder: (context) => AlertDialog(
         title: const Text('Confirm Selection'),
         content: Text(
-          'You have selected the following seats:\n${_selectedSeats.join(', ')}\nDo you want to proceed?',
+          '${widget.ticket.coach} \nSelected seats: ${_selectedSeats.join(', ')}',
+          style: TextStyle(
+            fontWeight: FontWeight.w500
+          ),
         ),
         actions: [
           TextButton(
@@ -156,25 +160,49 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Train: ${widget.ticket.train} \nCoach: ${widget.ticket.coach}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Text(
+                  'Train: ',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                ),
+                Text(
+                  widget.ticket.train,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'Coach: ',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                ),
+                Text(
+                  widget.ticket.coach,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(
-              'Select up to ${widget.ticket.pax} seats',
+              'Select ${widget.ticket.pax} seats',
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  childAspectRatio: 1,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5,
+                  childAspectRatio: 1, 
                 ),
-                itemCount: 20,
+                itemCount: 25, 
                 itemBuilder: (context, index) {
-                  final seatId = 'A${index + 1}';
+                  if (index % 5 == 2) {
+                    return const SizedBox.shrink(); 
+                  }
+
+                  final seatId = 'A${(index ~/ 5) * 4 + (index % 5 > 2 ? index % 5 - 1 : index % 5) + 1}';
                   bool isDisabled = _isSeatDisabled(seatId, userId);
                   bool isSelected = _selectedSeats.contains(seatId);
 
@@ -210,12 +238,63 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                 },
               ),
             ),
+            Row(
+              children: [
+                Container(
+                  width: screenSize(context).width * 0.12,
+                  height: screenSize(context).width * 0.12,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.green,
+                  ),
+                ),
+                SizedBox(width: 8,),
+                Text(
+                  'Available',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500
+                ),)
+              ],
+            ),
+            SizedBox(height: 16,),
+            Row(
+              children: [
+                Container(
+                  width: screenSize(context).width * 0.12,
+                  height: screenSize(context).width * 0.12,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(width: 8,),
+                Text(
+                  'Taken',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500
+                ),)
+              ],
+            ),
+            SizedBox(
+              height: screenSize(context).height * 0.1,
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _selectedSeats.isEmpty ? null : _showConfirmationDialog,
-        child: const Icon(Icons.check),
+      floatingActionButton: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder( 
+          borderRadius: BorderRadius.circular(15.0), 
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), 
+        minimumSize: Size(screenSize(context).width * 0.9, 50),
+        ), 
+        onPressed: _selectedSeats.length < widget.ticket.pax ? null : _showConfirmationDialog,
+        child: const Text('Proceed'),
       ),
     );
   }

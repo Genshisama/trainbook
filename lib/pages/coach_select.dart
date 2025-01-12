@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trainbook/pages/seat_select.dart';
-import 'package:trainbook/pages/ticket.dart';
+import 'package:trainbook/ticket.dart';
 
 class CoachSelectionPage extends StatefulWidget {
   final Ticket ticket;

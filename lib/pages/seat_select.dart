@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:trainbook/pages/summary.dart';
-import 'package:trainbook/pages/ticket.dart';
+import 'package:trainbook/ticket.dart';
+import 'package:trainbook/user.dart';
 
 class SeatSelectionPage extends StatefulWidget {
   final Ticket ticket;
@@ -17,6 +18,7 @@ class SeatSelectionPage extends StatefulWidget {
 
 class _SeatSelectionPageState extends State<SeatSelectionPage> {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  String userId = '';
   Map<String, dynamic> _seatStatus = {};
   List<String> _selectedSeats = [];
 
@@ -24,6 +26,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   void initState() {
     super.initState();
     _initializeTrainData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      userId = await User.getUserName();
+    });
   }
 
   Future<void> _initializeTrainData() async {
@@ -63,7 +68,6 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     if (_selectedSeats.length >= widget.ticket.pax) return;
     final path =
         'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seatId';
-    final userId = "currentUser";
 
     await _dbRef.child(path).set({
       "status": "locked",
@@ -98,11 +102,12 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     final status = seatData['status'];
     final lockedBy = seatData['lockedBy'];
 
-    bool isLocked = status == 'locked' || status == 'booked';
-    bool isLockedByCurrentUser = status == 'locked' && lockedBy == currentUser;
+    bool isBooked = status == 'booked';
+    bool isLockedByOther = status == 'locked' && lockedBy != currentUser;
 
-    return isLocked && !isLockedByCurrentUser;
+    return isBooked || isLockedByOther;
   }
+
 
   void _showConfirmationDialog() {
     showDialog(
@@ -165,7 +170,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                 itemCount: 20,
                 itemBuilder: (context, index) {
                   final seatId = 'A${index + 1}';
-                  bool isDisabled = _isSeatDisabled(seatId, 'currentUser');
+                  bool isDisabled = _isSeatDisabled(seatId, userId);
                   bool isSelected = _selectedSeats.contains(seatId);
 
                   return GestureDetector(

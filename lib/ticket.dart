@@ -1,6 +1,7 @@
 class Ticket {
   String origin;
   String destination;
+  double duration;
   String train;
   String coach;
   String date1;
@@ -13,6 +14,7 @@ class Ticket {
   Ticket({
     required this.origin,
     required this.destination,
+    required this.duration,
     required this.train,
     required this.coach,
     required this.date1,
@@ -27,6 +29,7 @@ class Ticket {
     return {
       'origin': origin,
       'destination': destination,
+      'duration': duration,
       'train': train,
       'coach': coach,
       'date1': date1,
@@ -42,6 +45,7 @@ class Ticket {
     return Ticket(
       origin: map['origin'] ?? '',
       destination: map['destination'] ?? '',
+      duration: map['duration'] ?? '',
       train: map['train'] ?? '',
       coach: map['coach'] ?? '',
       date1: map['date1'] ?? '',
@@ -57,6 +61,7 @@ class Ticket {
     return Ticket(
       origin: '',
       destination: '',
+      duration: 0.0,
       train: '',
       coach: '',
       date1: '',
@@ -70,6 +75,6 @@ class Ticket {
 
   @override
   String toString() {
-    return 'Ticket(origin: $origin, destination: $destination, train: $train, coach: $coach, date1: $date1, date2: $date2, pax: $pax, seats: $seats, price: $price, userName: $userName)';
+    return 'Ticket(origin: $origin, destination: $destination, duration: $duration, train: $train, coach: $coach, date1: $date1, date2: $date2, pax: $pax, seats: $seats, price: $price, userName: $userName)';
   }
 }

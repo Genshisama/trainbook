@@ -218,11 +218,11 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 16),
               FormBuilderField<DateTime>(
                 name: 'returnDate',
-                validator: (value) => value == null ? 'Please select a return date' : null,
+                // validator: (value) => value == null ? 'Please select a return date' : null,
                 builder: (field) {
                   return InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Return Date',
+                      labelText: 'Return Date (Optional)',
                       border: const OutlineInputBorder(),
                       errorText: field.errorText,
                       suffixIcon: IconButton(
@@ -262,13 +262,11 @@ class _HomePageState extends State<HomePage> {
                     if (_formKey.currentState!.saveAndValidate()) {
                       final formData = _formKey.currentState!.value;
                       
-                      print(formData);
-
                       final ticket = Ticket.fromEmpty();
                       ticket.origin = formData['origin'];
                       ticket.destination = formData['destination'];
                       ticket.date1 = formData['departureDate'].toUtc().toIso8601String();
-                      ticket.date2 = formData['returnDate'].toUtc().toIso8601String();
+                      ticket.date2 = formData['returnDate']?.toUtc().toIso8601String();
                       ticket.pax = int.parse(formData['pax']);
                       final random = Random();
                       ticket.duration = random.nextDouble() * 24;

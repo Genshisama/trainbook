@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 
@@ -10,4 +11,8 @@ import 'package:intl/intl.dart';
   List<String> processTime(String time){
     List<String> times = time.split(" - ");
     return times;
+  }
+
+  Size screenSize(BuildContext context){
+    return MediaQuery.of(context).size;
   }

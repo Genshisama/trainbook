@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:trainbook/pages/ticket.dart';
+import 'package:trainbook/ticket.dart';
 import 'package:trainbook/pages/train_select.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:trainbook/user.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -14,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _formKey = GlobalKey<FormBuilderState>();
+  String userName = '';
   final List<String> _locations = [
     'Johor',
     'Kedah',
@@ -46,6 +50,71 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  double getAvgCost() {
+    final random = Random();
+    double price = random.nextDouble() * 256;
+
+    price = double.parse(price.toStringAsFixed(2));
+    return price;
+  }
+
+  Future<void> getUserName() async {
+    userName = await User.getUserName();
+
+    if (userName.isEmpty) {
+      showNameDialog();
+    } else {
+      setState(() {});
+    }
+  }
+
+  Future<void> showNameDialog() async {
+    TextEditingController nameController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter Your Name'),
+          content: TextField(
+            controller: nameController,
+            decoration: InputDecoration(hintText: 'Your Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                String enteredName = nameController.text.trim();
+                if (enteredName.isNotEmpty) {
+                  if(userName.isNotEmpty){
+                    await User.removeUserName();
+                  }
+                  await User.saveUserName(enteredName);
+                  setState(() {
+                    userName = enteredName; 
+                  });
+                  Navigator.of(context).pop();
+                } else {
+                  // Optional: Show a warning for empty name
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Name cannot be empty!')),
+                  );
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    getUserName();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +127,26 @@ class _HomePageState extends State<HomePage> {
           key: _formKey,
           child: ListView(
             children: [
+              Container(
+                padding: EdgeInsets.only(bottom: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Hi, $userName',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w500
+                        ),
+                    ),
+                    IconButton(
+                      onPressed: (){
+                        showNameDialog();
+                      }, 
+                      icon: Icon(Icons.edit))
+                  ],
+                ),
+              ),
               FormBuilderDropdown<String>(
                 name: 'origin',
                 decoration: const InputDecoration(
@@ -181,6 +270,10 @@ class _HomePageState extends State<HomePage> {
                       ticket.date1 = formData['departureDate'].toUtc().toIso8601String();
                       ticket.date2 = formData['returnDate'].toUtc().toIso8601String();
                       ticket.pax = int.parse(formData['pax']);
+                      final random = Random();
+                      ticket.duration = random.nextDouble() * 24;
+                      ticket.userName = userName;
+                      ticket.price = getAvgCost();
                       
                       Navigator.push(
                         context,

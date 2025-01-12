@@ -187,49 +187,41 @@ class _SummaryPageState extends State<SummaryPage> {
                   ),
                 ],
               ),
-            ),
-            Spacer(),
-            ElevatedButton(
-               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder( 
-                  borderRadius: BorderRadius.circular(15.0), 
-                ),
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), 
-                minimumSize: Size(screenSize(context).width * 0.9, 50), 
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PaymentPage(),
-                  ),
-                ).then((_) {
-                  handlePaymentCompletion();
-                  changeSeatStatus().then((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Ticket booked successfully'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomePage(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                  });
-                });
-              },
-
-              child: const Text('Pay Now'),
-            ),
+            ),            
           ],
         ),
+      ),
+      floatingActionButton: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder( 
+          borderRadius: BorderRadius.circular(15.0), 
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), 
+        minimumSize: Size(screenSize(context).width * 0.9, 50), 
+      ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PaymentPage(),
+            ),
+          ).then((_) {
+            handlePaymentCompletion();
+            changeSeatStatus().then((_) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+                (Route<dynamic> route) => false,
+              );
+            });
+          });
+        },
+
+        child: const Text('Pay Now'),
       ),
     );
   }

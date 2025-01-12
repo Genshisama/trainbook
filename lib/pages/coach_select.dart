@@ -4,8 +4,9 @@ import 'package:trainbook/ticket.dart';
 
 class CoachSelectionPage extends StatefulWidget {
   final Ticket ticket;
+  final String time;
 
-  const CoachSelectionPage({super.key, required this.ticket});
+  const CoachSelectionPage({super.key, required this.ticket, required this.time});
 
   @override
   State<CoachSelectionPage> createState() => _CoachSelectionPageState();
@@ -61,6 +62,7 @@ class _CoachSelectionPageState extends State<CoachSelectionPage> {
                         MaterialPageRoute(
                           builder: (context) => SeatSelectionPage(
                             ticket: widget.ticket,
+                            time: widget.time
                           ),
                         ),
                       );

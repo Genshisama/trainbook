@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 import 'package:trainbook/pages/summary.dart';
 import 'package:trainbook/ticket.dart';
 import 'package:trainbook/user.dart';
 
 class SeatSelectionPage extends StatefulWidget {
   final Ticket ticket;
+  final String time;
 
   const SeatSelectionPage({
     super.key,
-    required this.ticket
+    required this.ticket,
+    required this.time
   });
 
   @override
@@ -20,7 +23,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
   String userId = '';
   Map<String, dynamic> _seatStatus = {};
-  List<String> _selectedSeats = [];
+  final List<String> _selectedSeats = [];
 
   @override
   void initState() {
@@ -38,8 +41,8 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     if (!snapshot.exists) {
       await _dbRef.child(path).set({
         "trainNumber": widget.ticket.train,
-        "departureTime": "${widget.ticket.date1}T10:00:00",
-        "arrivalTime": "${widget.ticket.date2}T14:00:00",
+        "departureTime": widget.ticket.date1,
+        "arrivalTime": widget.ticket.date2,
         "coaches": {
           widget.ticket.coach: {"seats": {}},
         },
@@ -129,7 +132,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SummaryPage(ticket: widget.ticket,), 
+                  builder: (context) => SummaryPage(
+                    ticket: widget.ticket,
+                    time: widget.time,), 
                 ),
               );
             },
@@ -152,7 +157,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Train: ${widget.ticket.train}, Coach: ${widget.ticket.coach}, Date: ${widget.ticket.date1}',
+              'Train: ${widget.ticket.train} \nCoach: ${widget.ticket.coach}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),

@@ -264,8 +264,8 @@ class _HomePageState extends State<HomePage> {
                       final ticket = Ticket.fromEmpty();
                       ticket.origin = formData['origin'];
                       ticket.destination = formData['destination'];
-                      ticket.date1 = formData['departureDate'].toUtc().toIso8601String();
-                      ticket.date2 = formData['returnDate']?.toUtc().toIso8601String();
+                      ticket.date1 = formData['departureDate'].toIso8601String();
+                      ticket.date2 = formData['returnDate']?.toIso8601String();
                       ticket.pax = int.parse(formData['pax']);
                       final random = Random();
                       ticket.duration = 2;

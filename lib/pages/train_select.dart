@@ -44,7 +44,7 @@ class _TrainSelectionPageState extends State<TrainSelectionPage> {
     
     DateTime departure = DateTime(date.year, date.month, date.day, hours[index], minutes[index]);
 
-    departureDT = departure.toUtc().toIso8601String();
+    departureDT = departure.toIso8601String();
     
     DateTime arrival = departure.add(Duration(hours: duration.toInt()));
     

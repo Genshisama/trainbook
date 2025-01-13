@@ -61,13 +61,17 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     final snapshot = await _dbRef.child(path).get();
 
     if (snapshot.exists) {
-      setState(() {
-        _seatStatus = Map<String, dynamic>.from(snapshot.value as Map);
-      });
+      if (mounted) {
+        setState(() {
+          _seatStatus = Map<String, dynamic>.from(snapshot.value as Map);
+        });
+      }
     } else {
-      setState(() {
-        _seatStatus = {};
-      });
+      if (mounted) {
+        setState(() {
+          _seatStatus = {};
+        });
+      }
     }
   }
 
@@ -78,9 +82,11 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   _dbRef.child(path).onValue.listen((event) {
     if (event.snapshot.value != null) {
       final updatedSeatStatus = Map<String, dynamic>.from(event.snapshot.value as Map);
-      setState(() {
-        _seatStatus = updatedSeatStatus;
-      });
+      if (mounted) {
+        setState(() {
+          _seatStatus = updatedSeatStatus;
+        });
+      }
     }
   });
 }
@@ -93,17 +99,19 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     await _dbRef.child(path).set({
       "status": "locked",
       "lockedBy": userId,
-      "lockTimestamp": DateTime.now().toUtc().toIso8601String(),
+      "lockTimestamp": DateTime.now().toIso8601String(),
     });
 
-    setState(() {
-      _seatStatus[seatId] = {
-        "status": "locked",
-        "lockedBy": userId,
-        "lockTimestamp": DateTime.now().toUtc().toIso8601String(),
-      };
-      _selectedSeats.add(seatId);
-    });
+    if (mounted) {
+      setState(() {
+        _seatStatus[seatId] = {
+          "status": "locked",
+          "lockedBy": userId,
+          "lockTimestamp": DateTime.now().toIso8601String(),
+        };
+        _selectedSeats.add(seatId);
+      });
+    }
   }
 
   Future<void> _deselectSeat(String seatId) async {
@@ -111,10 +119,12 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
         'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId/coaches/${widget.ticket.coach}/seats/$seatId';
     await _dbRef.child(path).remove();
 
-    setState(() {
-      _seatStatus.remove(seatId);
-      _selectedSeats.remove(seatId);
-    });
+    if (mounted) {
+      setState(() {
+        _seatStatus.remove(seatId);
+        _selectedSeats.remove(seatId);
+      });
+    }
   }
 
   bool _isSeatDisabled(String seatId, String currentUser) {

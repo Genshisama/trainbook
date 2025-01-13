@@ -24,6 +24,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   String userId = '';
   Map<String, dynamic> _seatStatus = {};
   final List<String> _selectedSeats = [];
+  String tripId = '';
 
   @override
   void initState() {
@@ -32,11 +33,12 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       userId = await User.getUserName();
     });
+     _addSeatChangeListener();
   }
 
   Future<void> _initializeTrainData() async {
-    String tripId = '${processDate(widget.ticket.date1)}, ${widget.time}';
-    final path = 'trains/${widget.ticket.train}/$tripId';
+    tripId = '${processDate(widget.ticket.date1)}, ${widget.time}';
+    final path = 'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId';
     final snapshot = await _dbRef.child(path).get();
 
     if (!snapshot.exists) {
@@ -44,6 +46,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
         "trainNumber": widget.ticket.train,
         "departureTime": widget.ticket.date1,
         "arrivalTime": widget.ticket.date2,
+        "price": widget.ticket.price,
         "coaches": {
           widget.ticket.coach: {"seats": {}},
         },
@@ -54,7 +57,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
 
   Future<void> _fetchSeatData() async {
     final path =
-        'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats';
+        'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId/coaches/${widget.ticket.coach}/seats';
     final snapshot = await _dbRef.child(path).get();
 
     if (snapshot.exists) {
@@ -68,22 +71,36 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     }
   }
 
+  void _addSeatChangeListener() {
+  final path =
+      'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId/coaches/${widget.ticket.coach}/seats';
+  
+  _dbRef.child(path).onValue.listen((event) {
+    if (event.snapshot.value != null) {
+      final updatedSeatStatus = Map<String, dynamic>.from(event.snapshot.value as Map);
+      setState(() {
+        _seatStatus = updatedSeatStatus;
+      });
+    }
+  });
+}
+
   Future<void> _selectSeat(String seatId) async {
     if (_selectedSeats.length >= widget.ticket.pax) return;
     final path =
-        'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seatId';
+        'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId/coaches/${widget.ticket.coach}/seats/$seatId';
 
     await _dbRef.child(path).set({
       "status": "locked",
       "lockedBy": userId,
-      "lockTimestamp": DateTime.now().toIso8601String(),
+      "lockTimestamp": DateTime.now().toUtc().toIso8601String(),
     });
 
     setState(() {
       _seatStatus[seatId] = {
         "status": "locked",
         "lockedBy": userId,
-        "lockTimestamp": DateTime.now().toIso8601String(),
+        "lockTimestamp": DateTime.now().toUtc().toIso8601String(),
       };
       _selectedSeats.add(seatId);
     });
@@ -91,7 +108,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
 
   Future<void> _deselectSeat(String seatId) async {
     final path =
-        'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seatId';
+        'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/$tripId/coaches/${widget.ticket.coach}/seats/$seatId';
     await _dbRef.child(path).remove();
 
     setState(() {
@@ -138,7 +155,8 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                 MaterialPageRoute(
                   builder: (context) => SummaryPage(
                     ticket: widget.ticket,
-                    time: widget.time,), 
+                    time: widget.time,
+                    tripId: tripId,), 
                 ),
               );
             },
@@ -202,6 +220,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
                     return const SizedBox.shrink(); 
                   }
 
+                  //create empty row to simulate aisle
                   final seatId = 'A${(index ~/ 5) * 4 + (index % 5 > 2 ? index % 5 - 1 : index % 5) + 1}';
                   bool isDisabled = _isSeatDisabled(seatId, userId);
                   bool isSelected = _selectedSeats.contains(seatId);

@@ -94,7 +94,6 @@ class _HomePageState extends State<HomePage> {
                   });
                   Navigator.of(context).pop();
                 } else {
-                  // Optional: Show a warning for empty name
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Name cannot be empty!')),
                   );
@@ -269,7 +268,7 @@ class _HomePageState extends State<HomePage> {
                       ticket.date2 = formData['returnDate']?.toUtc().toIso8601String();
                       ticket.pax = int.parse(formData['pax']);
                       final random = Random();
-                      ticket.duration = random.nextDouble() * 24;
+                      ticket.duration = 2;
                       ticket.userName = userName;
                       ticket.price = getAvgCost();
                       

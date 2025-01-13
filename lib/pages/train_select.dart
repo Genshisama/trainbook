@@ -16,6 +16,7 @@ class _TrainSelectionPageState extends State<TrainSelectionPage> {
   final List<String> _trains = ['Train A', 'Train B', 'Train C', 'Train D'];
   String departureDT = '';
 
+  //generate dummy data for price
   double getPrice() {
     final random = Random();
 
@@ -27,16 +28,21 @@ class _TrainSelectionPageState extends State<TrainSelectionPage> {
     return price;
   }
 
-  String getTime() {
+  //generate dummy data for time
+  String getTime(int index) {
     DateTime date = DateTime.parse(widget.ticket.date1);
     double duration = widget.ticket.duration; 
+
+    List<int> hours = [8,12,18,22]; 
+    List<int> minutes = [0,15,30,45]; 
+
     
-    final random = Random();
+    // final random = Random();
     
-    int randomHours = random.nextInt(24); 
-    int randomMinutes = random.nextInt(60); 
+    // int randomHours = random.nextInt(24); 
+    // int randomMinutes = random.nextInt(60); 
     
-    DateTime departure = DateTime(date.year, date.month, date.day, randomHours, randomMinutes);
+    DateTime departure = DateTime(date.year, date.month, date.day, hours[index], minutes[index]);
 
     departureDT = departure.toUtc().toIso8601String();
     
@@ -75,7 +81,7 @@ class _TrainSelectionPageState extends State<TrainSelectionPage> {
                 itemCount: _trains.length,
                 itemBuilder: (context, index) {
                   double price = getPrice();
-                  String time = getTime();
+                  String time = getTime(index);
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(

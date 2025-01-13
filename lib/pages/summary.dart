@@ -7,8 +7,9 @@ import 'package:trainbook/utils.dart';
 class SummaryPage extends StatefulWidget {
   final Ticket ticket;
   final String time;
+  final String tripId;
 
-  const SummaryPage({super.key, required this.ticket, required this.time});
+  const SummaryPage({super.key, required this.ticket, required this.time, required this.tripId});
 
   @override
   State<SummaryPage> createState() => _SummaryPageState();
@@ -28,7 +29,7 @@ class _SummaryPageState extends State<SummaryPage> {
   Future<void> changeSeatStatus() async {
     for(String seat in widget.ticket.seats){
       final path =
-        'trains/${widget.ticket.train}/coaches/${widget.ticket.coach}/seats/$seat/status';
+        'trains/${widget.ticket.train}/${widget.ticket.origin} - ${widget.ticket.destination}/${widget.tripId}/coaches/${widget.ticket.coach}/seats/$seat/status';
 
       await _dbRef.child(path).set("booked");
     }
@@ -160,7 +161,7 @@ class _SummaryPageState extends State<SummaryPage> {
                         ),),
                       SizedBox(width: 16,),
                       Text(
-                        'RM ${widget.ticket.price}',
+                        'RM ${widget.ticket.price.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold
@@ -178,7 +179,7 @@ class _SummaryPageState extends State<SummaryPage> {
                         ),),
                       SizedBox(width: 16,),
                       Text(
-                        'RM ${widget.ticket.price * widget.ticket.pax}',
+                        'RM ${(widget.ticket.price * widget.ticket.pax).toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold

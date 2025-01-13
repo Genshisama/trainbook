@@ -2,7 +2,7 @@
 
 This project is developed for demonstration purposes only.
 
-## Getting Started
+## Introduction
 
 This application is built and tested exclusively for the **Android platform**.  
 Please note the following:  
